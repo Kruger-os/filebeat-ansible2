@@ -1,0 +1,50 @@
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
+- name: Get the rpm or apt package facts
+  ansible.builtin.package_facts:
+    manager: "auto"
+  register: packages_versions
+
+- name: Version compare
+  ansible.builtin.assert:
+    that:
+      - "'{{ version }}' is version('{{ packages_versions.ansible_facts.packages['filebeat'][0].version }}', '>')"
+    msg: "New version to install: {{ version }}, current version of filebeat: {{ packages_versions.ansible_facts.packages['filebeat'][0].version }}"
+  register: filebeat_version_compare
+  ignore_errors: true
+  when: "'filebeat.service' in services"
+
+- name: Fail if version is lower than currently installed
+  ansible.builtin.assert:
+    that:
+      - "'{{ version }}' is version('{{ packages_versions.ansible_facts.packages['filebeat'][0].version }}', '>=')"
+    success_msg: "New version: {{ version }} is higher or equal than
+     current version of filebeat: {{ packages_versions.ansible_facts.packages['filebeat'][0].version }}"
+    fail_msg: "New version: {{ version }} is lower than
+     current: {{ packages_versions.ansible_facts.packages['filebeat'][0].version }} -> cancelling update/config change"
+  when: "'filebeat.service' in services"
+
+- name: Add elasticsearch repository
+  ansible.builtin.include_tasks:
+    file: add_elasticsearch_repository.yml
+
+- name: Install Filebeat {{ version }}
+  ansible.builtin.include_tasks:
+    file: filebeat_install.yml
+  when: filebeat_version_compare.failed is false or 'filebeat.service' not in services
+
+- name: Setting Filebeat configuration files
+  ansible.builtin.include_tasks:
+    file: filebeat_configuration.yml
+  tags: config_update
+
+- name: Start Filebeat service
+  ansible.builtin.service:
+    name: filebeat
+    enabled: true
+    state: started
+  register: myservice
+  until: myservice.status.ActiveState == "active"
+  retries: 5
+  delay: 60
