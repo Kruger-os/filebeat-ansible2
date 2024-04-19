@@ -1,0 +1,136 @@
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+logging.level: {{ filebeat_logging_level }}
+logging.to_files: {{ filebeat_logging_to_files }}
+logging.files:
+  path: {{ filebeat_logging_files_path }}
+  name: {{ filebeat_logging_files_name }}
+  keepfiles: {{ filebeat_logging_files_keepfiles }}
+  permissions: {{ filebeat_logging_files_permissions }}
+
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - add_kubernetes_metadata: ~
+
+output.logstash:
+  hosts:
+{% for host in groups['logstash'] %}
+    - {{ hostvars[host]['inventory_hostname'] }}.pkobp.pl:{{ logstash_http_port }}
+{% endfor %}
+  loadbalace: true
+  ssl.enabled: true
+
+filebeat.inputs:
+- type: filestream
+  id: gitlab-production-json
+  paths:
+    - /var/log/gitlab/gitlab-rails/production_json.log
+  fields:
+    event.provider: gitlab
+    service.version: {{ gitlab_rails_version }}
+    service.name: gitlab-production-json
+    service.environment: {{ gitlab_env }}
+    host.name: {{ ansible_hostname }}
+    event.reason: {{ gitlab_event_reason }}
+    event.code: 0
+  fields_under_root: true
+  parsers:
+    - ndjson:
+        target: ""
+        message_key: msg
+
+- type: filestream
+  id: gitlab-exception-json
+  paths:
+    - /var/log/gitlab/gitlab-rails/exceptions_json.log
+  fields:
+    event.provider: gitlab
+    service.version: {{ gitlab_rails_version }}
+    service.name: gitlab-exceptions-json
+    service.environment: {{ gitlab_env }}
+    host.name: {{ ansible_hostname }}
+    event.reason: {{ gitlab_event_reason }}
+    event.code: 1
+  fields_under_root: true
+  parsers:
+    - ndjson:
+        target: ""
+        message_key: msg
+
+- type: filestream
+  id: gitlab-api-json
+  paths:
+    - /var/log/gitlab/gitlab-rails/api_json.log
+  fields:
+    event.provider: gitlab
+    service.version: {{ gitlab_rails_version }}
+    service.name: gitlab-api-json
+    service.environment: {{ gitlab_env }}
+    host.name: {{ ansible_hostname }}
+    event.reason: {{ gitlab_event_reason }}
+    event.code: 0
+  fields_under_root: true
+  parsers:
+    - ndjson:
+        target: ""
+        message_key: msg
+
+- type: filestream
+  id: gitlab-application-json
+  paths:
+    - /var/log/gitlab/gitlab-rails/application_json.log
+  fields:
+    event.provider: gitlab
+    service.version: {{ gitlab_rails_version }}
+    service.name: gitlab-application-json
+    service.environment: {{ gitlab_env }}
+    host.name: {{ ansible_hostname }}
+    event.reason: {{ gitlab_event_reason }}
+    event.code: 0
+  fields_under_root: true
+  parsers:
+    - ndjson:
+        target: ""
+        message_key: msg
+
+- type: filestream
+  id: gitlab-ruby-json
+  paths:
+    - /var/log/gitlab/gitaly/gitaly_ruby_json.log
+  fields:
+    event.provider: gitlab
+    service.version: {{ gitlab_rails_version }}
+    service.name: gitlab-ruby-json
+    service.environment: {{ gitlab_env }}
+    host.name: {{ ansible_hostname }}
+    event.reason: {{ gitlab_event_reason }}
+    event.code: 0
+  fields_under_root: true
+  parsers:
+    - ndjson:
+        target: ""
+        message_key: msg
+
+- type: filestream
+  id: gitlab-shell-json
+  paths:
+    - /var/log/gitlab/gitlab-shell/gitlab-shell.log
+  fields:
+    event.provider: gitlab
+    service.version: {{ gitlab_rails_version }}
+    service.name: gitlab-shell-json
+    service.environment: {{ gitlab_env }}
+    host.name: {{ ansible_hostname }}
+    event.reason: {{ gitlab_event_reason }}
+    event.code: 0
+  fields_under_root: true
+  parsers:
+    - ndjson:
+        target: ""
+        message_key: msg
+
