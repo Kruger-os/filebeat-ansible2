@@ -1,0 +1,28 @@
+- name: Copy filebeat.yml template
+  ansible.builtin.template:
+    src: 'templates/filebeat.yml.j2'
+    dest: '{{ filebeat_conf_path }}/filebeat.yml'
+    owner: root
+    group: root
+    backup: true
+    mode: '600'
+  notify: Restart Filebeat service
+
+- name: Check existance of filebeat.service template
+  delegate_to: localhost
+  become: false
+  ansible.builtin.stat:
+    path: 'templates/filebeat.service.j2'
+  register: filebeat_service
+
+- name: Copy filebeat.service to /etc/systemd
+  ansible.builtin.copy:
+    src: 'templates/filebeat.service.j2'
+    dest: /etc/systemd/system/filebeat.service
+    owner: root
+    group: root
+    backup: true
+    mode: '644'
+  when: filebeat_service.stat.exists
+  notify: Daemon reload
+
