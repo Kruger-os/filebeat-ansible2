@@ -1,0 +1,10 @@
+---
+- name: Filebeat Install/Upgrade/Update
+  hosts: filebeat
+  gather_facts: yes
+  become: yes
+  become_user: root
+  tasks:
+    - name: Filebeat Install/Upgrade
+      ansible.builtin.import_role:
+        name: filebeat
