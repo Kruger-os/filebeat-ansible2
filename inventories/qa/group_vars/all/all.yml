@@ -1,0 +1,21 @@
+env: 'qa'
+version: '8.8.2'
+
+filebeat_logging_level: 'warning'
+filebeat_logging_to_files: 'true'
+filebeat_logging_files_path: '/var/log/filebeat'
+filebeat_logging_files_name: 'filebeat'
+filebeat_logging_files_keepfiles: '7'
+filebeat_logging_files_permissions: '0640'
+
+logstash_http_port: '5044'
+
+repo_name: elasticsearch-8.x
+repo_description: 'Elasticsearch repository for 8.x packages'
+repo_server: https://dupa.1234.tutaj.pl
+repo_gpgcheck: true
+repo_gpgkey: https://dupa.1234.tutaj.pl
+repo_filename: elasticsearch-8.x.repo
+repo_enabled: false
+
+filebeat_conf_path: '/etc/filebeat'
