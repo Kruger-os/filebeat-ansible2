@@ -1,0 +1,25 @@
+filebeat:
+  children:
+    qa-dupa:
+      hosts:
+        dupa:
+          ansible_hostname: dupa4
+      vars:
+        gitlab_rails_version: 16.8.2
+        gitlab_env: 'test'
+        gitlab_event_reason: 'rails'
+    dev-dupa:
+      hosts:
+        dupa:
+          ansible_hostname: dupa3
+      vars:
+        gitlab_rails_version: 16.8.2
+        gitlab_env: 'dev'
+        gitlab_event_reason: 'rails'
+
+logstash:
+  hosts:
+    dupa:
+      ansible_hostname: dupa2
+    dupa:
+      ansible_hostname: dupa1
