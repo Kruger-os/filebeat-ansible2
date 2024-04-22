@@ -1,0 +1,18 @@
+- type: filestream
+  id: gitlab-shell-json
+  paths:
+    - /var/log/gitlab/gitlab-shell/gitlab-shell.log
+  fields:
+    event.provider: gitlab
+    service.version: {{ gitlab_rails_version }}
+    service.name: gitlab-shell-json
+    service.environment: {{ gitlab_env }}
+    host.name: {{ ansible_hostname }}
+    event.reason: {{ gitlab_event_reason }}
+    event.code: 0
+  fields_under_root: true
+  parsers:
+    - ndjson:
+        target: ""
+        message_key: msg
+
